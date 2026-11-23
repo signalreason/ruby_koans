@@ -104,6 +104,44 @@ class AboutMethods < Neo::Koan
 
   # ------------------------------------------------------------------
 
+  def square(n) = n * n
+
+  def greeting = "Hello"
+
+  def test_short_methods_can_be_written_on_one_line_without_end
+    assert_equal __(9), square(3)
+    assert_equal __("Hello"), greeting
+  end
+
+  # (NOTE: The next two koans use eval because the code inside the
+  # strings is not valid Ruby.)
+
+  def test_endless_methods_need_parentheses_around_their_parameters
+    assert_raise(___(SyntaxError)) do
+      eval("def cube n = n * n * n")
+    end
+  end
+
+  def test_endless_methods_cannot_be_setters
+    assert_raise(___(SyntaxError)) do
+      eval("def name=(value) = @name = value")
+    end
+  end
+
+  private def whisper(words) = words.downcase
+
+  def test_endless_methods_can_be_made_private_too
+    assert_equal __("psst"), whisper("PSST")
+    assert_equal __(true), self.class.private_method_defined?(:whisper)
+
+    # THINK ABOUT IT:
+    #
+    # When is a one-line "endless" method clearer than a regular one?
+    # When would you rather write the full def ... end?
+  end
+
+  # ------------------------------------------------------------------
+
   def my_method_in_the_same_class(a, b)
     a * b
   end
