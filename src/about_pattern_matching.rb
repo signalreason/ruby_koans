@@ -212,4 +212,126 @@ class AboutPatternMatching < Neo::Koan
     assert_equal __([0, 0]), hash_pattern_with_sugar(LetterAccountant.new('xyz'))
   end
 
+  # ------------------------------------------------------------------
+
+  # A class name in a pattern matches any object of that class
+  def describe(value)
+    case value
+    in Integer | Float
+      :number
+    in String
+      :string
+    in []
+      :empty_array
+    in Array
+      :array
+    else
+      :something_else
+    end
+  end
+
+  def test_class_pattern
+    assert_equal __(:number), describe(42)
+    assert_equal __(:number), describe(4.2)
+    assert_equal __(:string), describe("42")
+    assert_equal __(:empty_array), describe([])
+    assert_equal __(:array), describe([42])
+    assert_equal __(:something_else), describe(nil)
+  end
+
+  # ------------------------------------------------------------------
+
+  def test_array_pattern_can_collect_the_rest_with_a_splat
+    case [1, 2, 3, 4]
+    in [first, *rest]
+      assert_equal __(1), first
+      assert_equal __([2, 3, 4]), rest
+    end
+  end
+
+  # The find pattern looks for a match anywhere inside an array
+  def test_find_pattern
+    case [1, "two", :three, 4.0]
+    in [*before, Symbol => found, *after]
+      assert_equal __(:three), found
+      assert_equal __([1, "two"]), before
+      assert_equal __([4.0]), after
+    end
+  end
+
+  # ------------------------------------------------------------------
+
+  def test_hash_pattern_matches_even_when_there_are_extra_keys
+    config = { name: "koans", version: 4, debug: true }
+
+    case config
+    in { name: String => name, **rest }
+      assert_equal __("koans"), name
+      assert_equal __({ version: 4, debug: true }), rest
+    end
+  end
+
+  def test_star_star_nil_means_no_other_keys_are_allowed
+    config = { name: "koans", version: 4 }
+
+    result = case config
+    in { name: String, **nil }
+      :only_a_name
+    in { name: String }
+      :a_name_and_more
+    end
+
+    assert_equal __(:a_name_and_more), result
+  end
+
+  # ------------------------------------------------------------------
+
+  # Data objects work with both array and hash patterns
+  Point = Data.define(:x, :y)
+
+  def where_is(point)
+    case point
+    in Point[x: 0, y: 0]
+      "at the origin"
+    in Point[x: 0, y:]
+      "on the y axis at #{y}"
+    in Point[x, y]
+      "at #{x}, #{y}"
+    end
+  end
+
+  def test_data_objects_can_be_matched
+    assert_equal __("at the origin"), where_is(Point.new(0, 0))
+    assert_equal __("on the y axis at 5"), where_is(Point.new(0, 5))
+    assert_equal __("at 3, 4"), where_is(Point.new(3, 4))
+  end
+
+  # ------------------------------------------------------------------
+
+  # Patterns can also be used on one line, without case
+  def test_arrow_pulls_values_out_or_raises_an_error
+    point = { x: 1, y: 2 }
+    point => { x:, y: }
+
+    assert_equal __(1), x
+    assert_equal __(2), y
+
+    assert_raise(___(NoMatchingPatternKeyError)) do
+      point => { z: Integer }
+    end
+  end
+
+  def test_in_checks_whether_a_value_matches
+    point = { x: 1, y: 2 }
+
+    assert_equal __(true), (point in { x: Integer })
+    assert_equal __(false), (point in { x: String })
+    assert_equal __(false), (point in { z: Integer })
+
+    # THINK ABOUT IT:
+    #
+    # When would you reach for a one-line "=>" or "in" instead of a
+    # full case statement?
+  end
+
 end
