@@ -76,6 +76,8 @@ class AboutEnumerable < Neo::Koan
 
   # ------------------------------------------------------------------
 
+  # Hashes are Enumerable too, but they also have methods of their own,
+  # like transform_values and except, that other collections don't.
   def test_hashes_have_handy_transforming_methods
     prices = { apple: 1, pear: 2, fig: 3 }
 
@@ -99,9 +101,9 @@ class AboutEnumerable < Neo::Koan
 
   # ------------------------------------------------------------------
 
-  # Any class can get all of these methods by defining "each" and
-  # including Enumerable. (You will learn more about include in
-  # about_modules.)
+  # Any class can get the Enumerable methods (like sum, select, sort_by
+  # and tally) by defining "each" and including Enumerable. (You will
+  # learn more about include in about_modules.)
   class Countdown
     include Enumerable
 
