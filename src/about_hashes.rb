@@ -43,6 +43,20 @@ class AboutHashes < Neo::Koan
     # rather than used as a literal?
   end
 
+  def test_symbol_keys_have_a_shorter_syntax
+    hash = { one: "uno", two: "dos" }
+    assert_equal __(true), hash == { :one => "uno", :two => "dos" }
+    assert_equal __(:one), hash.keys.first
+  end
+
+  def test_values_can_be_left_out_when_a_variable_has_the_same_name
+    name = "Fido"
+    age = 3
+    hash = { name:, age: }
+
+    assert_equal __({ name: "Fido", age: 3 }), hash
+  end
+
   def test_hash_equality_ignores_order
     hash1 = { :one => "uno", :two => "dos" }
     hash2 = { :two => "dos", :one => "uno" }

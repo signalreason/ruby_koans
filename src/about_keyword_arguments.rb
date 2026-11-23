@@ -40,4 +40,47 @@ class AboutKeywordArguments < Neo::Koan
     assert_match(/#{__("missing keyword: :one")}/, exception.message)
   end
 
+  def test_keyword_arguments_can_also_leave_out_values
+    one = "uno"
+    assert_equal __(["uno", "two"]), method_with_keyword_arguments(one:)
+  end
+
+  # ------------------------------------------------------------------
+
+  def method_that_shows_its_arguments(*args, **kwargs, &block)
+    [args, kwargs, block&.call]
+  end
+
+  def forward_everything(...)
+    method_that_shows_its_arguments(...)
+  end
+
+  def test_three_dots_forward_all_arguments_to_another_method
+    result = forward_everything(1, 2, color: "red") { :from_the_block }
+    assert_equal __([[1, 2], { color: "red" }, :from_the_block]), result
+  end
+
+  def forward_all_but_the_first(first, ...)
+    method_that_shows_its_arguments(...)
+  end
+
+  def test_three_dots_can_come_after_other_parameters
+    result = forward_all_but_the_first(:kept_here, 2, color: "blue")
+    assert_equal __([[2], { color: "blue" }, nil]), result
+  end
+
+  def forward_each_kind_separately(*, **, &)
+    method_that_shows_its_arguments(*, **, &)
+  end
+
+  def test_unnamed_parameters_can_be_forwarded_one_kind_at_a_time
+    result = forward_each_kind_separately(1, size: "large") { :from_the_block }
+    assert_equal __([[1], { size: "large" }, :from_the_block]), result
+
+    # THINK ABOUT IT:
+    #
+    # Why might you forward arguments with ... or *, ** and & instead
+    # of listing every parameter by name?
+  end
+
 end
