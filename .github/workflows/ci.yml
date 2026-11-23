@@ -1,16 +1,38 @@
 name: CI
-on: [push]
+on:
+  push:
+  pull_request:
+
 jobs:
   test:
+    name: Ruby ${{ matrix.ruby }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ["3.3", "3.4", "4.0"]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
 
-      - name: Install Ruby!
+      - name: Install Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.2.2"
+          ruby-version: ${{ matrix.ruby }}
 
-      - name: run tests
+      - name: Run consistency checks
         run: rake test
+
+      - name: Run the solved koans
+        # The koan runner exits 0 even when a koan fails (so learners don't
+        # see a rake stack trace), so check for the completion message.
+        env:
+          SIMPLE_KOAN_OUTPUT: "true"
+        run: |
+          rake run | tee koan-output.txt
+          grep -q "Mountains are again merely mountains" koan-output.txt
+
+      - name: Check the generated koans are valid Ruby
+        run: |
+          rake gen
+          for f in koans/*.rb; do ruby -c "$f" > /dev/null || exit 1; done

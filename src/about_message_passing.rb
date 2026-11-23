@@ -99,12 +99,9 @@ class AboutMessagePassing < Neo::Koan
     #
     # NOTE:
     #
-    # In Ruby 1.8 the method_missing method is public and can be
-    # called as shown above. However, in Ruby 1.9 (and later versions)
-    # the method_missing method is private. We explicitly made it
-    # public in the testing framework so this example works in both
-    # versions of Ruby. Just keep in mind you can't call
-    # method_missing like that after Ruby 1.9 normally.
+    # method_missing is normally a private method. We explicitly made it
+    # public in the testing framework so this example works. Just keep
+    # in mind you can't usually call method_missing directly like that.
     #
     # Thanks.  We now return you to your regularly scheduled Ruby
     # Koans.
