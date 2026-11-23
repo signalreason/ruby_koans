@@ -25,6 +25,10 @@ def in_ruby_version(*versions)
   yield if versions.any? { |v| ruby_version?(v) }
 end
 
+def ruby_version_at_least?(version)
+  Gem::Version.new(RUBY_VERSION) >= Gem::Version.new(version)
+end
+
 # Standard, generic replacement value.
 def __(value="FILL ME IN")
   value

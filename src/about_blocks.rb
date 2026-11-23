@@ -93,4 +93,37 @@ class AboutBlocks < Neo::Koan
     assert_equal __(11), method_with_explicit_block(&add_one)
   end
 
+  # ------------------------------------------------------------------
+
+  def test_blocks_can_use_numbered_parameters_instead_of_names
+    assert_equal __([10, 20, 30]), [1, 2, 3].map { _1 * 10 }
+    assert_equal __(["a=1", "b=2"]), { a: 1, b: 2 }.map { "#{_1}=#{_2}" }
+  end
+
+  def test_using_only_1_does_not_split_up_arrays
+    pairs = [[1, 2], [3, 4]]
+    assert_equal __([[1, 2], [3, 4]]), pairs.map { _1 }
+    assert_equal __([3, 7]), pairs.map { _1 + _2 }
+  end
+
+  if ruby_version_at_least?("3.4")
+    def test_it_names_the_only_block_parameter
+      assert_equal __(["APPLE", "KIWI"]), ["apple", "kiwi"].map { it.upcase }
+      assert_equal __([[1, 2], [3, 4]]), [[1, 2], [3, 4]].map { it }
+    end
+  end
+
+  # (NOTE: We use eval below because the code in the string is not
+  # valid Ruby.)
+  def test_numbered_parameters_cannot_be_mixed_with_named_ones
+    assert_raise(___(SyntaxError)) do
+      eval("[1, 2].map { |n| n + _1 }")
+    end
+
+    # THINK ABOUT IT:
+    #
+    # When is { |word| word.upcase } clearer than { it.upcase }?
+    # When is it the other way around?
+  end
+
 end
