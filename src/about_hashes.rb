@@ -43,11 +43,24 @@ class AboutHashes < Neo::Koan
     # rather than used as a literal?
   end
 
-  def test_hash_is_unordered
+  def test_hash_equality_ignores_order
     hash1 = { :one => "uno", :two => "dos" }
     hash2 = { :two => "dos", :one => "uno" }
 
     assert_equal __(true), hash1 == hash2
+  end
+
+  def test_hashes_remember_insertion_order
+    hash = { :two => "dos", :one => "uno" }
+    hash[:three] = "tres"
+
+    assert_equal __([:two, :one, :three]), hash.keys
+    assert_equal __(["dos", "uno", "tres"]), hash.values
+
+    # THINK ABOUT IT:
+    #
+    # Two hashes with the same keys and values are equal even if their
+    # keys were added in a different order. So when does the order matter?
   end
 
   def test_hash_keys

@@ -32,6 +32,16 @@ jobs:
           rake run | tee koan-output.txt
           grep -q "Mountains are again merely mountains" koan-output.txt
 
+      - name: Run the solved koans with frozen string literals
+        # Guards against koans that rely on changing string literals,
+        # which will break if Ruby makes frozen literals the default.
+        env:
+          SIMPLE_KOAN_OUTPUT: "true"
+          RUBYOPT: "--enable=frozen-string-literal"
+        run: |
+          rake run | tee koan-output-frozen.txt
+          grep -q "Mountains are again merely mountains" koan-output-frozen.txt
+
       - name: Check the generated koans are valid Ruby
         run: |
           rake gen

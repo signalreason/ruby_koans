@@ -1,3 +1,9 @@
+# frozen_string_literal: false
+#
+# The magic comment above tells Ruby that the string literals in this
+# file can be changed. Some of these koans change strings in place, so
+# they need it. See test_frozen_strings_cannot_be_changed below.
+
 require File.expand_path(File.dirname(__FILE__) + '/neo')
 
 class AboutStrings < Neo::Koan
@@ -102,6 +108,42 @@ EOS
     #
     # Ruby programmers tend to favor the shovel operator (<<) over the
     # plus equals operator (+=) when building up strings.  Why?
+  end
+
+  def test_frozen_strings_cannot_be_changed
+    string = "Hello".freeze
+    assert_equal __(true), string.frozen?
+
+    assert_raise(___(FrozenError)) do
+      string << ", World"
+    end
+  end
+
+  def test_dup_makes_a_changeable_copy_of_a_frozen_string
+    original = "Hello".freeze
+    copy = original.dup
+    copy << ", World"
+
+    assert_equal __(false), copy.frozen?
+    assert_equal __("Hello, World"), copy
+    assert_equal __("Hello"), original
+  end
+
+  def test_unary_plus_also_gives_you_a_changeable_string
+    frozen = "Hello".freeze
+    unfrozen = +frozen
+    unfrozen << ", World"
+
+    assert_equal __("Hello, World"), unfrozen
+    assert_equal __(true), frozen.frozen?
+
+    # THINK ABOUT IT:
+    #
+    # Many Ruby files start with the magic comment
+    # "# frozen_string_literal: true", which freezes every string
+    # literal in the file, and future versions of Ruby are expected to
+    # make that the default. Why might frozen strings be a good default?
+    # How would you build up a string in a file like that?
   end
 
   def test_double_quoted_string_interpret_escape_characters
