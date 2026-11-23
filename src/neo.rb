@@ -25,41 +25,19 @@ def in_ruby_version(*versions)
   yield if versions.any? { |v| ruby_version?(v) }
 end
 
-def before_ruby_version(version)
-  Gem::Version.new(RUBY_VERSION) < Gem::Version.new(version)
-end
-
-in_ruby_version("1.8") do
-  class KeyError < StandardError
-  end
-end
-
 # Standard, generic replacement value.
-# If value19 is given, it is used in place of value for Ruby 1.9.
-def __(value="FILL ME IN", value19=:mu)
-  if RUBY_VERSION < "1.9"
-    value
-  else
-    (value19 == :mu) ? value : value19
-  end
+def __(value="FILL ME IN")
+  value
 end
 
 # Numeric replacement value.
-def _n_(value=999999, value19=:mu)
-  if RUBY_VERSION < "1.9"
-    value
-  else
-    (value19 == :mu) ? value : value19
-  end
+def _n_(value=999999)
+  value
 end
 
 # Error object replacement value.
-def ___(value=FillMeInError, value19=:mu)
-  if RUBY_VERSION < "1.9"
-    value
-  else
-    (value19 == :mu) ? value : value19
-  end
+def ___(value=FillMeInError)
+  value
 end
 
 # Method name replacement.
@@ -70,9 +48,7 @@ class Object
     end
   end
 
-  in_ruby_version("1.9", "2", "3", "4") do
-    public :method_missing
-  end
+  public :method_missing
 end
 
 class String
@@ -83,7 +59,7 @@ class String
     else
       left_padding = extra / 2
       right_padding = (extra+1)/2
-      (" " * left_padding) + self + (" " *right_padding)
+      (" " * left_padding) + self + (" " * right_padding)
     end
   end
 end
@@ -197,7 +173,7 @@ module Neo
       begin
         yield
       rescue Exception => ex
-        flunk "Expected nothing to be raised, but exception #{exception.inspect} was raised"
+        flunk "Expected nothing to be raised, but exception #{ex.inspect} was raised"
       end
     end
   end
@@ -302,7 +278,6 @@ module Neo
     end
 
     def artistic_end_screen
-      "JRuby 1.9.x Koans"
       ruby_version = "(in #{'J' if defined?(JRUBY_VERSION)}Ruby #{defined?(JRUBY_VERSION) ? JRUBY_VERSION : RUBY_VERSION})"
       ruby_version = ruby_version.side_padding(54)
         completed = <<-ENDTEXT
